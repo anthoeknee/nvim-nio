@@ -5,7 +5,9 @@ nvim-nio                                                              *nvim-nio*
 
   nio....................................................................|nio|
   nio.control....................................................|nio.control|
+  nio.fs..............................................................|nio.fs|
   nio.lsp............................................................|nio.lsp|
+  nio.net............................................................|nio.net|
   nio.process....................................................|nio.process|
   nio.streams....................................................|nio.streams|
   nio.uv..............................................................|nio.uv|
@@ -299,6 +301,69 @@ Fields~
 semaphore acquired
 {acquire} `(async fun(): nil)` Acquire the semaphore
 {release} `(fun(): nil)` Release the semaphore
+
+
+==============================================================================
+nio.fs                                                                  *nio.fs*
+
+
+                                                                 *nio.fs.glob()*
+`glob`({pattern}, {cwd})
+
+Recursively finds files matching a glob pattern.
+This is an async function.
+
+>lua
+  local nio = require("nio")
+  nio.run(function()
+    local files = nio.fs.glob("src/**/*.lua")
+    for _, file in ipairs(files) do
+      print(file)
+    end
+  end)
+<
+Parameters~
+{pattern} `(string)` The glob pattern to match. Supports `*` and `**`.
+{cwd?} `(string)` The working directory to start the search from. Defaults to the current working directory.
+
+Return~
+`(string[])` A list of matching file paths.
+
+
+==============================================================================
+nio.net                                                                *nio.net*
+
+
+                                                             *nio.net.connect()*
+`connect`({host}, {port})
+
+Connect to a TCP server.
+This is an async function.
+
+>lua
+  local nio = require("nio")
+  nio.run(function()
+    local ok, stream = pcall(nio.net.connect, "127.0.0.1", 8080)
+    if not ok then
+      print("Failed to connect:", stream) -- stream is the error message
+      return
+    end
+
+    stream:write("hello from nvim-nio!")
+    local data = stream:read()
+    if data then
+      print("Received:", data)
+    end
+    stream:close()
+  end)
+<
+Parameters~
+{host} `(string)` The host to connect to.
+{port} `(number)` The port to connect to.
+
+Return~
+`(nio.net.Stream)` A stream object for the connection. The stream is a
+`StreamReaderWriter` and has `read`, `write`, and `close` methods.
 
 
 ==============================================================================
